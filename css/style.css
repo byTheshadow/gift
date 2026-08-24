@@ -1,0 +1,934 @@
+/* =========================================================
+   Echoes for 夜寒
+   Monochrome / Diffused Light / Soundscape
+   ========================================================= */
+
+:root {
+  --black: #080808;
+  --deep-black: #030303;
+  --white: #f2f1ec;
+  --pure-white: #ffffff;
+  --soft-white: rgba(242, 241, 236, 0.72);
+  --muted-white: rgba(242, 241, 236, 0.46);
+  --faint-white: rgba(242, 241, 236, 0.12);
+  --hairline: rgba(242, 241, 236, 0.22);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.1);
+
+  --serif: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
+  --sans: Inter, "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* -------------------------
+   Reset
+   ------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--black);
+  color: var(--white);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 50% 45%,
+      rgba(255, 255, 255, 0.055) 0%,
+      rgba(255, 255, 255, 0.015) 30%,
+      transparent 70%
+    ),
+    var(--black);
+  color: var(--white);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 1px solid var(--pure-white);
+  outline-offset: 5px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* -------------------------
+   Global layers
+   ------------------------- */
+
+#three-container,
+.atmosphere,
+#shatter-canvas,
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#three-container {
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.82;
+  transition: opacity 1.8s var(--ease-out);
+}
+
+#three-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#shatter-canvas {
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#app {
+  z-index: 5;
+  isolation: isolate;
+}
+
+.noscript-message {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: var(--black);
+  color: var(--white);
+  text-align: center;
+}
+
+/* -------------------------
+   Diffused atmosphere
+   ------------------------- */
+
+.atmosphere {
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.8;
+  mix-blend-mode: screen;
+}
+
+.mist {
+  position: absolute;
+  width: 42vw;
+  height: 30vw;
+  min-width: 280px;
+  min-height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+  filter: blur(75px);
+  opacity: 0.4;
+  will-change: transform;
+}
+
+.mist-one {
+  top: 8%;
+  left: -10%;
+  animation: mist-drift-one 24s ease-in-out infinite alternate;
+}
+
+.mist-two {
+  right: -12%;
+  bottom: 8%;
+  width: 50vw;
+  height: 35vw;
+  background: rgba(255, 255, 255, 0.035);
+  animation: mist-drift-two 30s ease-in-out infinite alternate;
+}
+
+.mist-three {
+  top: 40%;
+  left: 38%;
+  width: 28vw;
+  height: 24vw;
+  background: rgba(255, 255, 255, 0.025);
+  filter: blur(100px);
+  animation: mist-drift-three 20s ease-in-out infinite alternate;
+}
+
+.grain {
+  position: absolute;
+  inset: -50%;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+  transform: rotate(7deg);
+  animation: grain-shift 0.35s steps(2) infinite;
+}
+
+@keyframes mist-drift-one {
+  from {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(18%, 12%, 0) scale(1.18);
+  }
+}
+
+@keyframes mist-drift-two {
+  from {
+    transform: translate3d(2%, 8%, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-16%, -10%, 0) scale(0.92);
+  }
+}
+
+@keyframes mist-drift-three {
+  from {
+    transform: translate3d(-8%, 4%, 0);
+  }
+  to {
+    transform: translate3d(12%, -14%, 0);
+  }
+}
+
+@keyframes grain-shift {
+  0% {
+    transform: translate(0, 0) rotate(7deg);
+  }
+  25% {
+    transform: translate(2%, -1%) rotate(7deg);
+  }
+  50% {
+    transform: translate(-1%, 2%) rotate(7deg);
+  }
+  75% {
+    transform: translate(-2%, -2%) rotate(7deg);
+  }
+  100% {
+    transform: translate(1%, 1%) rotate(7deg);
+  }
+}
+
+/* -------------------------
+   Scene system
+   ------------------------- */
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 5rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    visibility 0.9s;
+}
+
+.scene.scene--active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.scene-index {
+  position: absolute;
+  right: clamp(1.5rem, 4vw, 4rem);
+  bottom: clamp(1.25rem, 3vw, 2.5rem);
+  margin: 0;
+  color: var(--muted-white);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+}
+
+/* -------------------------
+   Typography
+   ------------------------- */
+
+.eyebrow {
+  margin: 0 0 1.3rem;
+  color: var(--muted-white);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+h1 {
+  margin-bottom: 1.8rem;
+  font-size: clamp(2.5rem, 6vw, 5.8rem);
+  line-height: 1.08;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1.2;
+}
+
+/* -------------------------
+   Prelude
+   ------------------------- */
+
+.prelude-content {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 680px);
+  text-align: center;
+}
+
+.prelude-wave-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+  height: 4.5rem;
+  margin: 0 auto 2rem;
+}
+
+.prelude-wave-mark span {
+  display: block;
+  width: 1px;
+  height: 100%;
+  background: var(--soft-white);
+  transform-origin: center;
+  animation: wave-mark 1.8s ease-in-out infinite;
+}
+
+.prelude-wave-mark span:nth-child(1) {
+  height: 30%;
+  animation-delay: -0.7s;
+}
+
+.prelude-wave-mark span:nth-child(2) {
+  height: 82%;
+  animation-delay: -0.4s;
+}
+
+.prelude-wave-mark span:nth-child(3) {
+  height: 46%;
+  animation-delay: -0.1s;
+}
+
+@keyframes wave-mark {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+    opacity: 0.35;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.prelude-copy {
+  margin-bottom: 2.5rem;
+  color: var(--soft-white);
+  font-family: var(--serif);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 2;
+}
+
+/* -------------------------
+   Buttons
+   ------------------------- */
+
+.line-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 3rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  transition:
+    border-color 0.35s ease,
+    background 0.35s ease,
+    transform 0.35s var(--ease-out);
+}
+
+.line-button:hover {
+  border-color: var(--soft-white);
+  background: var(--glass-strong);
+  transform: translateY(-3px);
+}
+
+.button-code {
+  color: var(--muted-white);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+}
+
+/* -------------------------
+   Game header
+   ------------------------- */
+
+#game-scene {
+  align-items: stretch;
+  justify-content: space-between;
+  padding-top: clamp(2rem, 7vh, 5rem);
+  padding-bottom: clamp(2rem, 6vh, 4rem);
+}
+
+.game-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+}
+
+.progress-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.progress-label {
+  color: var(--muted-white);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+}
+
+.progress-block strong {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.game-instruction {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: 1.4rem;
+}
+
+.instruction-line {
+  width: 2.5rem;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.game-instruction p {
+  margin: 0;
+  color: var(--muted-white);
+  font-family: var(--serif);
+  font-size: 0.95rem;
+}
+
+/* -------------------------
+   Blind-box track
+   ------------------------- */
+
+.blindbox-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+  width: calc(100% + 2 * clamp(1.5rem, 5vw, 5rem));
+  margin-left: calc(-1 * clamp(1.5rem, 5vw, 5rem));
+  padding: 2rem clamp(1.5rem, 5vw, 5rem) 3rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.blindbox-track::-webkit-scrollbar {
+  display: none;
+}
+
+.blindbox-track:active {
+  cursor: grabbing;
+}
+
+/*
+  供 JS 动态生成的盲盒卡片基础样式。
+  后续 data.js / app.js 会使用这些 class。
+*/
+
+.blindbox {
+  position: relative;
+  display: flex;
+  flex: 0 0 clamp(13rem, 23vw, 20rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: clamp(18rem, 43vh, 28rem);
+  padding: 2rem;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.015)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.25);
+  scroll-snap-align: center;
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    transform 0.5s var(--ease-out),
+    border-color 0.5s ease,
+    background 0.5s ease,
+    opacity 0.5s ease;
+}
+
+.blindbox::before {
+  position: absolute;
+  inset: 12%;
+  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  content: "";
+  filter: blur(1px);
+  transition: transform 0.8s var(--ease-out);
+}
+
+.blindbox:hover {
+  border-color: var(--soft-white);
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(255, 255, 255, 0.13),
+      transparent 65%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.025)
+    );
+  transform: translateY(-0.7rem);
+}
+
+.blindbox:hover::before {
+  transform: scale(1.12);
+}
+
+.blindbox.is-opening {
+  animation: box-shake 0.75s ease-in-out;
+}
+
+.blindbox.is-opened {
+  opacity: 0.22;
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+.blindbox-icon {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 2rem;
+  color: var(--soft-white);
+}
+
+.blindbox-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 0.8;
+}
+
+.blindbox-number {
+  position: absolute;
+  top: 1.1rem;
+  left: 1.2rem;
+  color: var(--muted-white);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+}
+
+.blindbox-title {
+  margin: 0 0 0.7rem;
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.blindbox-hint {
+  margin: 0;
+  color: var(--muted-white);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+@keyframes box-shake {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  20% {
+    transform: translateY(-0.6rem) rotate(-1deg);
+  }
+
+  40% {
+    transform: translateY(0.7rem) rotate(1deg);
+  }
+
+  60% {
+    transform: translateY(-0.45rem) rotate(-0.8deg);
+  }
+
+  80% {
+    transform: translateY(0.3rem) rotate(0.5deg);
+  }
+}
+
+/* -------------------------
+   Game footer
+   ------------------------- */
+
+.game-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.game-footer > p {
+  margin: 0;
+  color: var(--muted-white);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+}
+
+.sound-toggle,
+.replay-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted-white);
+  cursor: pointer;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  transition: color 0.3s ease;
+}
+
+.sound-toggle:hover,
+.replay-button:hover {
+  color: var(--white);
+}
+
+.sound-icon {
+  display: block;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.sound-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* -------------------------
+   Artifact scene
+   ------------------------- */
+
+.artifact-scene {
+  text-align: center;
+}
+
+.artifact-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 560px);
+}
+
+.artifact-halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(70vw, 30rem);
+  height: min(70vw, 30rem);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  filter: blur(75px);
+  opacity: 0.65;
+  transform: translate(-50%, -53%);
+  pointer-events: none;
+}
+
+.artifact-icon {
+  display: grid;
+  place-items: center;
+  width: clamp(8rem, 18vw, 13rem);
+  height: clamp(8rem, 18vw, 13rem);
+  margin: 0 auto 2.2rem;
+  color: var(--white);
+  animation: artifact-float 4s ease-in-out infinite;
+}
+
+.artifact-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 0.8;
+}
+
+.artifact-content h2 {
+  margin-bottom: 0.55rem;
+}
+
+.artifact-en {
+  margin-bottom: 1.5rem;
+  color: var(--muted-white);
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+}
+
+.artifact-divider {
+  width: 3rem;
+  height: 1px;
+  margin-bottom: 1.5rem;
+  background: var(--hairline);
+}
+
+.artifact-description {
+  max-width: 30rem;
+  margin-bottom: 2rem;
+  color: var(--soft-white);
+  font-family: var(--serif);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 2;
+}
+
+@keyframes artifact-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-0.8rem) rotate(2deg);
+  }
+}
+
+/* -------------------------
+   Confession scene
+   ------------------------- */
+
+.confession-scene {
+  text-align: center;
+}
+
+.confession-content {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 760px);
+}
+
+.confession-label {
+  margin-bottom: 2.5rem;
+}
+
+.confession-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  color: var(--soft-white);
+  font-family: var(--serif);
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+  line-height: 1.9;
+}
+
+.confession-line {
+  min-height: 1.9em;
+  opacity: 0;
+  transition: opacity 1.3s var(--ease-out);
+}
+
+.confession-line.is-visible {
+  opacity: 1;
+}
+
+.confession-signature {
+  margin: 3rem 0 1.5rem;
+  color: var(--pure-white);
+  font-family: var(--serif);
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  letter-spacing: 0.12em;
+  opacity: 0;
+  transition: opacity 1.5s var(--ease-out);
+}
+
+.confession-signature.is-visible {
+  opacity: 1;
+}
+
+/* -------------------------
+   Responsive layout
+   ------------------------- */
+
+@media (max-width: 700px) {
+  .scene {
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .scene-index {
+    right: 1.25rem;
+    bottom: 1.2rem;
+  }
+
+  .game-header {
+    gap: 1rem;
+  }
+
+  .game-header h2 {
+    max-width: 12rem;
+    font-size: 1.45rem;
+  }
+
+  .progress-label {
+    font-size: 0.48rem;
+    text-align: right;
+  }
+
+  .blindbox-track {
+    width: calc(100% + 2.5rem);
+    margin-left: -1.25rem;
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .blindbox {
+    flex-basis: min(72vw, 17rem);
+    height: 20rem;
+  }
+
+  .game-footer > p {
+    font-size: 0.46rem;
+  }
+
+  .artifact-description {
+    max-width: 19rem;
+  }
+
+  .confession-text {
+    gap: 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-height: 650px) and (orientation: landscape) {
+  .scene {
+    padding-top: 1.2rem;
+    padding-bottom: 1.2rem;
+  }
+
+  .prelude-wave-mark {
+    height: 2.8rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    margin-bottom: 0.8rem;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .prelude-copy {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .blindbox {
+    height: 15rem;
+  }
+
+  .artifact-icon {
+    width: 6rem;
+    height: 6rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* -------------------------
+   Reduced motion
+   ------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .grain {
+    display: none;
+  }
+}

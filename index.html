@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <meta
+    name="description"
+    content="一段关于频率、回声与星光的私密漫游。"
+  />
+  <meta name="theme-color" content="#080808" />
+
+  <title>Echoes for 夜寒</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- Three.js：用于声波、弥散空间与终章星河 -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"
+    defer
+  ></script>
+</head>
+
+<body>
+  <noscript>
+    <div class="noscript-message">
+      此页面需要启用 JavaScript，才能接入这段频率。
+    </div>
+  </noscript>
+
+  <!-- Three.js 底层画布容器 -->
+  <div id="three-container" aria-hidden="true"></div>
+
+  <!-- 多层弥散雾光：CSS 制作，不依赖图片 -->
+  <div class="atmosphere" aria-hidden="true">
+    <div class="mist mist-one"></div>
+    <div class="mist mist-two"></div>
+    <div class="mist mist-three"></div>
+    <div class="grain"></div>
+  </div>
+
+  <!-- 玻璃碎裂时启用的 Canvas -->
+  <canvas id="shatter-canvas" aria-hidden="true"></canvas>
+
+  <main id="app">
+
+    <!-- 场景 01：序曲 / 加载入口 -->
+    <section id="prelude-scene" class="scene scene--active" aria-labelledby="prelude-title">
+      <div class="prelude-content">
+        <p class="eyebrow">SIGNAL // 00.00 Hz</p>
+
+        <div class="prelude-wave-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <h1 id="prelude-title">
+          一段频率，<br />
+          正在等待被听见。
+        </h1>
+
+        <p class="prelude-copy">
+          万物仍在静音。<br />
+          点击调频，接入这一段未完成的旋律。
+        </p>
+
+        <button id="enter-button" class="line-button" type="button">
+          <span>接入共鸣</span>
+          <span class="button-code">CONNECT</span>
+        </button>
+      </div>
+
+      <p class="scene-index" aria-hidden="true">01 / PRELUDE</p>
+    </section>
+
+    <!-- 场景 02：盲盒主界面 -->
+    <section id="game-scene" class="scene" aria-labelledby="game-title" hidden>
+      <header class="game-header">
+        <div>
+          <p class="eyebrow">RESONANCE ARCHIVE</p>
+          <h2 id="game-title">选择三段尚未命名的回声</h2>
+        </div>
+
+        <div class="progress-block" aria-live="polite">
+          <span class="progress-label">RESONANCE CAPTURED</span>
+          <strong id="progress-count">0 / 3</strong>
+        </div>
+      </header>
+
+      <div class="game-instruction">
+        <span class="instruction-line"></span>
+        <p id="game-hint">滑动浏览，选择一只盲盒。</p>
+      </div>
+
+      <!-- JS 将在这里插入六个盲盒 -->
+      <div
+        id="blindbox-track"
+        class="blindbox-track"
+        role="list"
+        aria-label="共鸣盲盒列表"
+      ></div>
+
+      <footer class="game-footer">
+        <p>DRAG / SCROLL TO DISCOVER</p>
+
+        <button
+          id="sound-toggle"
+          class="sound-toggle"
+          type="button"
+          aria-label="关闭音效"
+          aria-pressed="false"
+        >
+          <span class="sound-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 10v4h4l5 4V6L8 10H4Z"></path>
+              <path d="M16 9.5c.8.65 1.25 1.52 1.25 2.5s-.45 1.85-1.25 2.5"></path>
+              <path d="M18.5 7c1.55 1.25 2.5 3 2.5 5s-.95 3.75-2.5 5"></path>
+            </svg>
+          </span>
+          <span id="sound-status">SOUND: ON</span>
+        </button>
+      </footer>
+
+      <p class="scene-index" aria-hidden="true">02 / RESONANCE</p>
+    </section>
+
+    <!-- 场景 03：打开盲盒后展示的信物 -->
+    <section
+      id="artifact-scene"
+      class="scene artifact-scene"
+      aria-labelledby="artifact-title"
+      hidden
+    >
+      <div class="artifact-halo" aria-hidden="true"></div>
+
+      <div class="artifact-content">
+        <p id="artifact-number" class="eyebrow">ARCHIVE // 01</p>
+
+        <!-- JS 会将对应 SVG 信物放入这里 -->
+        <div id="artifact-icon" class="artifact-icon" aria-hidden="true"></div>
+
+        <h2 id="artifact-title"></h2>
+        <p id="artifact-en" class="artifact-en"></p>
+
+        <div class="artifact-divider" aria-hidden="true"></div>
+
+        <p id="artifact-description" class="artifact-description"></p>
+
+        <button id="accept-artifact-button" class="line-button" type="button">
+          <span>收下这段回声</span>
+          <span class="button-code">ACCEPT</span>
+        </button>
+      </div>
+
+      <p class="scene-index" aria-hidden="true">03 / ARCHIVE</p>
+    </section>
+
+    <!-- 场景 04：最终表白 -->
+    <section
+      id="confession-scene"
+      class="scene confession-scene"
+      aria-labelledby="confession-title"
+      hidden
+    >
+      <div class="confession-content">
+        <p class="eyebrow confession-label">TRANSMISSION COMPLETE</p>
+
+        <div id="confession-text" class="confession-text" aria-live="polite">
+          <!-- 打字机文字由 JS 插入 -->
+        </div>
+
+        <p id="confession-signature" class="confession-signature" hidden>
+          TO. 夜寒
+        </p>
+
+        <button id="replay-button" class="replay-button" type="button" hidden>
+          [ REPLAY THE ECHO ]
+        </button>
+      </div>
+
+      <p class="scene-index" aria-hidden="true">04 / SYMPHONY</p>
+    </section>
+
+  </main>
+
+  <!-- 按顺序加载：数据 → 音频 → 视觉 → 主控制逻辑 -->
+  <script src="./js/data.js" defer></script>
+  <script src="./js/audio.js" defer></script>
+  <script src="./js/visuals.js" defer></script>
+  <script src="./js/app.js" defer></script>
+</body>
+</html>
