@@ -205,10 +205,18 @@ window.EchoVisuals = (() => {
   function init() {
     if (isInitialized) return;
 
-    if (!window.THREE) {
-      console.error("Three.js 未成功加载。请检查 CDN 网络连接。");
-      return;
-    }
+  if (!window.THREE) {
+  console.error("Three.js 未加载。");
+  console.error("当前网址：", window.location.href);
+  console.error(
+    "Three.js 本地路径应为：",
+    new URL("./js/three.min.js", window.location.href).href
+  );
+  return;
+}
+
+console.log("Three.js 已成功加载，版本：", window.THREE.REVISION);
+
 
     const container = document.getElementById("three-container");
 
