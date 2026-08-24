@@ -780,8 +780,20 @@ h2 {
    ------------------------- */
 
 .confession-scene {
+  justify-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: clamp(5rem, 15vh, 10rem);
+  padding-bottom: clamp(5rem, 15vh, 10rem);
   text-align: center;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
+
+.confession-scene::-webkit-scrollbar {
+  display: none;
+}
+
 
 .confession-content {
   position: relative;

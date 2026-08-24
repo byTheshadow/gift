@@ -13,6 +13,9 @@
     return;
   }
 
+  let artifactCollectAnimation = null;
+
+
   const state = {
     selectedCount: 0,
     collectedArtifactIds: [],
@@ -318,15 +321,28 @@
      信物展示与收集
      ------------------------------------------------------- */
 
-  async function showArtifact(artifact) {
-    elements.artifactNumber.textContent = artifact.archiveNumber;
-    elements.artifactIcon.innerHTML = artifact.icon;
-    elements.artifactTitle.textContent = artifact.title;
-    elements.artifactEn.textContent = artifact.englishTitle;
-    elements.artifactDescription.textContent = artifact.description;
-
-    await showScene(elements.artifactScene);
+ async function showArtifact(artifact) {
+  /*
+    取消上一件信物「飞走」时留下的 Web Animation 状态。
+    否则下一枚 SVG 会继承 opacity: 0 / scale: 0.12。
+  */
+  if (artifactCollectAnimation) {
+    artifactCollectAnimation.cancel();
+    artifactCollectAnimation = null;
   }
+
+  elements.artifactIcon.style.opacity = "1";
+  elements.artifactIcon.style.transform = "translateY(0) scale(1)";
+
+  elements.artifactNumber.textContent = artifact.archiveNumber;
+  elements.artifactIcon.innerHTML = artifact.icon;
+  elements.artifactTitle.textContent = artifact.title;
+  elements.artifactEn.textContent = artifact.englishTitle;
+  elements.artifactDescription.textContent = artifact.description;
+
+  await showScene(elements.artifactScene);
+}
+
 
   async function acceptArtifact() {
     if (state.isBusy || !state.pendingArtifact) return;
@@ -341,23 +357,24 @@
       信物收下时，SVG 先缩小淡出，
       营造「变成背景中的一颗星」的感觉。
     */
-    elements.artifactIcon.animate(
-      [
-        {
-          transform: "translateY(0) scale(1)",
-          opacity: 1
-        },
-        {
-          transform: "translateY(-7rem) scale(0.12)",
-          opacity: 0
-        }
-      ],
-      {
-        duration: 750,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        fill: "forwards"
-      }
-    );
+    artifactCollectAnimation = elements.artifactIcon.animate(
+  [
+    {
+      transform: "translateY(0) scale(1)",
+      opacity: 1
+    },
+    {
+      transform: "translateY(-7rem) scale(0.12)",
+      opacity: 0
+    }
+  ],
+  {
+    duration: 750,
+    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    fill: "forwards"
+  }
+);
+
 
     await wait(570);
 
@@ -374,6 +391,12 @@
       重置内联动画残留状态，
       供下一枚信物正常出现。
     */
+
+      if (artifactCollectAnimation) {
+  artifactCollectAnimation.cancel();
+  artifactCollectAnimation = null;
+}
+
     elements.artifactIcon.style.opacity = "";
     elements.artifactIcon.style.transform = "";
 
@@ -654,39 +677,64 @@
     }
   }
 
-  async function playConfession() {
-    elements.confessionText.innerHTML = "";
-    elements.confessionSignature.hidden = true;
-    elements.confessionSignature.classList.remove("is-visible");
-    elements.replayButton.hidden = true;
+  function scrollToLatestConfessionLine() {
+  const scene = elements.confessionScene;
 
-    for (const line of DATA.confessionLines) {
-      if (!line) {
-        await wait(650);
-        continue;
-      }
+  requestAnimationFrame(() => {
+    scene.scrollTo({
+      top: scene.scrollHeight,
+      behavior: "smooth"
+    });
+  });
+}
 
-      const lineElement = document.createElement("p");
-      lineElement.className = "confession-line";
-      lineElement.textContent = "";
 
-      elements.confessionText.appendChild(lineElement);
+async function playConfession() {
+  elements.confessionText.innerHTML = "";
+  elements.confessionSignature.hidden = true;
+  elements.confessionSignature.classList.remove("is-visible");
+  elements.replayButton.hidden = true;
 
-      await typeLine(lineElement, line);
-      await wait(470);
+  /* 每次进入终章时，从顶部开始。 */
+  elements.confessionScene.scrollTo({
+    top: 0,
+    behavior: "instant"
+  });
+
+  for (const line of DATA.confessionLines) {
+    if (!line) {
+      await wait(650);
+      continue;
     }
 
-    elements.confessionSignature.textContent = DATA.signature;
-    elements.confessionSignature.hidden = false;
+    const lineElement = document.createElement("p");
+    lineElement.className = "confession-line";
+    lineElement.textContent = "";
 
-    requestAnimationFrame(() => {
-      elements.confessionSignature.classList.add("is-visible");
-    });
+    elements.confessionText.appendChild(lineElement);
 
-    await wait(1300);
+    await typeLine(lineElement, line);
 
-    elements.replayButton.hidden = false;
+    /* 每完成一句，自动缓慢滚到最新内容。 */
+    scrollToLatestConfessionLine();
+
+    await wait(470);
   }
+
+  elements.confessionSignature.textContent = DATA.signature;
+  elements.confessionSignature.hidden = false;
+
+  requestAnimationFrame(() => {
+    elements.confessionSignature.classList.add("is-visible");
+    scrollToLatestConfessionLine();
+  });
+
+  await wait(1300);
+
+  elements.replayButton.hidden = false;
+  scrollToLatestConfessionLine();
+}
+
 
   /* -------------------------------------------------------
      音效开关

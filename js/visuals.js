@@ -406,7 +406,7 @@ window.EchoVisuals = (() => {
 
     if (!renderer || !scene || !camera) return;
 
-    const delta = Math.min(clock.getDelta(), 0.05);
+const delta = Math.min(clock.getDelta(), 0.05);
 const elapsed = clock.elapsedTime;
 
 
